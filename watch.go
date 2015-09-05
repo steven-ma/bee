@@ -168,9 +168,17 @@ func Autobuild(files []string, isgenerate bool) {
 			appName += ".exe"
 		}
 
+		//获取代码git版本号
+		git_cmd := exec.Command("git", "rev-parse", "HEAD")
+		git_version_byte, _ := git_cmd.Output()
+		git_version := string(git_version_byte)
+		git_version = git_version[0 : len(git_version)-1] //去掉最后的不可见字符
+		ld_string := "-X main._VERSION_ " + git_version
+
 		args := []string{"build"}
 		args = append(args, "-o", appName)
 		args = append(args, files...)
+		args = append(args, "-ldflags", ld_string) //增加ldflags的编译选项参数
 
 		bcmd := exec.Command(cmdName, args...)
 		bcmd.Stdout = os.Stdout
